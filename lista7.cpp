@@ -3,35 +3,59 @@
 #include <sys/resource.h>
 
 using namespace std;
- 
-// AUma função que retorna o maior de 2 valores
+
+#define pesoMax 1000
+#define valorMax 1000
+
+bool taken[100][100];
+
+// Função que retorna o maior de 2 valores
 int max(int a, int b) { return (a > b)? a : b; }
- 
+
 // Retorna o valor máximo que pode ser colocado na mochila com o peso limite determinado
-int knapSack(int pesoLim, int pesos[], int valores[], int n)
+void knapSack(int pesoLim, int pesos[], int valores[], int n)
 {
    int i, w;
    int K[n+1][pesoLim+1];
- 
+
    // Construa a tabela K [] [] de maneira ascendente
    for (i = 0; i <= n; i++)
    {
        for (w = 0; w <= pesoLim; w++)
        {
            if (i==0 || w==0)
-               K[i][w] = 0;
-           else if (pesos[i-1] <= w)
-                 K[i][w] = max(valores[i-1] + K[i-1][w-pesos[i-1]],  K[i-1][w]);
-           else
-                 K[i][w] = K[i-1][w];
+                K[i][w] = 0;
+           else if (pesos[i-1] <= w){
+                K[i][w] = max(valores[i-1] + K[i-1][w-pesos[i-1]],  K[i-1][w]);
+                if(K[i][w]== valores[i-1] + K[i-1][w-pesos[i-1]]){
+                  taken[i][w] = true;
+                  }
+                }
+           else{
+                K[i][w] = K[i-1][w];
+              }
        }
    }
- 
-   return K[n][pesoLim];
+
+   cout << "\nValor da mochila = " << K[n][pesoLim] << endl;
+   cout << endl;
+   int res = K[n][pesoLim];
+   w = pesoLim;
+   for (i = n; i > 0 && res > 0; i--) {
+       if (res == K[i - 1][w])
+           continue;
+       else {
+           printf("Valor do item = %d; Peso = %d\n", valores[i - 1], pesos[i - 1]);
+
+           res = res - valores[i - 1];
+           w = w - pesos[i - 1];
+       }
+   }
 }
- 
+
 int main()
 {
+    memset(taken, false, sizeof taken);
     int size;
     cout << "Informe o tamanho dos vetores:" << '\n';
     cin >> size;
@@ -70,8 +94,11 @@ int main()
 
     cout << endl;
 
-    int  pesoLim = 100;
+    int  pesoLim;
+    cout << "Insira o peso máximo da mochila: ";
+    cin >> pesoLim;
+
     int n = sizeof(valores)/sizeof(valores[0]);
-    printf("%d\n", knapSack(pesoLim, pesos, valores, n));
+    knapSack(pesoLim, pesos, valores, n);
     return 0;
 }
